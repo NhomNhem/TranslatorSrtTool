@@ -14,7 +14,7 @@
 
 ---
 
-## 🛠 Cài đặt
+## 🛠 Cài đặt (nếu bạn không muốn cài đặt Python hãy bỏ qua bước này và [tải xuống](https://github.com/NhomNhem/TranslatorSrtTool/releases/tag/Tool)
 
 ### 1️⃣ Cài đặt thư viện cần thiết
 
@@ -58,11 +58,12 @@ pip install pillow
 
 ### 2️⃣ **Lỗi** `FileNotFoundError: [Errno 2] No such file or directory: 'sprite/ani.gif'`
 
-🔹 Cách khắc phục: Kiểm tra lại đường dẫn file ảnh GIF, đảm bảo nó tồn tại.
+🔹 Cách khắc phục: Kiểm tra lại đường dẫn file ảnh GIF, đảm bảo nó tồn tại. Trong trường hợp này, bạn vào thư mục /dist và paste thư mục sprite vào đó. Sau đó chạy file .exe.
 
 ### 3️⃣ **Lỗi**  `RuntimeError: Too early to create image: no default root window`
 
 🔹 Cách khắc phục: Đảm bảo `Tk()` được khởi tạo trước khi load ảnh GIF:
+
 
 ```python
 root = tk.Tk()  # Khởi tạo Tkinter trước
