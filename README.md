@@ -70,6 +70,29 @@ root = tk.Tk()  # Khởi tạo Tkinter trước
 ...
 gif_image = Image.open(gif_path)
 ```
+---
+## 💻 Hướng dẫn sử dụng
+
+### 1️⃣ **Chọn file `.srt` cần dịch**
+
+🔹 Bạn có thể chọn file `.srt` cần dịch bằng cách nhấn vào nút `Browse` và chọn file từ hộp thoại mở file.
+
+### 2️⃣ **Dịch file `.srt`**
+
+🔹 Sau khi chọn file `.srt`, sau khi chọn sẽ dịch file `.srt` từ tiếng Anh sang tiếng Việt.
+
+### 3️⃣ **Lưu file `.srt` đã dịch**
+
+🔹 Sau khi dịch file `.srt`, bạn được lưu vào cùng thư mục với file `.srt` gốc với tên file là `translated_` + tên file gốc.
+
+### 4️⃣ **Mở Video**
+
+🔹 Bạn có thể mở video bằng cách nhấn vào nút `Open Video` và chọn file video từ hộp thoại mở file.
+
+### 5️⃣ **Hiển thị phụ đề**
+
+🔹 Sau khi chọn file video, bạn có thể hiển thị phụ đề bằng cách nhấn vào nút `Show Subtitle`.
+
 
 ---
 
