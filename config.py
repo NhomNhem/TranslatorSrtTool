@@ -25,3 +25,4 @@ PROGRESS_BAR_COLOR = "#7FFF00"  # Example: Chartreuse
 STATUS_COLOR = "#00008B" # Not used
 FONT = ("Arial", 12)
 FILE_NAME_MAX_LENGTH = 20  # Maximum characters for filenames before truncation
+HEADER_FONT = ("Helvetica", 14, "bold")

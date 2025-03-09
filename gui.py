@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, colorchooser, messagebox
 from PIL import Image, ImageTk, ImageSequence
-#import file_handling  # Import file_handling to use resource_path REMOVED # Good - no direct file_handling import
-import config        # Import config for constants
-import sys          # For sys.platform
+import file_handling  # Đảm bảo import file_handling ở đầu file
+import config  # Import config for constants
+import sys  # For sys.platform
+import threading
 
 
 class ScrolledFrame(tk.Frame):
@@ -19,7 +20,7 @@ class ScrolledFrame(tk.Frame):
                                         width=12)  # Thicker, styled scrollbar
         # No horizontal scrollbar needed
         # self.scrollbar_x = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
-        self.canvas.configure(yscrollcommand=self.scrollbar_y.set) # xscrollcommand removed
+        self.canvas.configure(yscrollcommand=self.scrollbar_y.set)  # xscrollcommand removed
 
         # Pack the scrollbar and canvas
         self.scrollbar_y.pack(side="right", fill="y")
@@ -45,15 +46,13 @@ class ScrolledFrame(tk.Frame):
             # Update the canvas's width to fit the inner frame
             self.canvas.config(width=self.inner_frame.winfo_reqwidth())
 
-
     def _configure_canvas(self, event):
         if self.inner_frame.winfo_reqwidth() != self.canvas.winfo_width():
             # Update the inner frame's width to fill the canvas
             self.canvas.itemconfigure(self.canvas_frame, width=self.canvas.winfo_width())
 
     def _on_mousewheel(self, event):
-         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _bound_to_mousewheel(self, event):
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
@@ -61,8 +60,8 @@ class ScrolledFrame(tk.Frame):
     def _unbound_to_mousewheel(self, event):
         self.canvas.unbind_all("<MouseWheel>")
 
-# --- Global Variables (Avoid if possible) --- # Good comment about avoiding globals
-# These are set in main.py after the Tkinter root window is created. # Explanation is good
+
+# --- Global Variables ---
 root = None
 file_frame = None
 file_label = None
@@ -75,10 +74,9 @@ color_label = None
 preview_label = None
 format_dropdown = None
 color_button = None
-selected_format = None  # Use StringVar in main.py # Documentation helpful
-selected_color = None   # Use StringVar in main.py # Documentation helpful
+selected_format = None  # Use StringVar in main.py
+selected_color = None  # Use StringVar in main.py
 
-# --- GIF Animation --- Removed # Comment helpful
 
 def choose_color(selected_color, preview_label, format_dropdown):
     """Opens a color chooser and updates the selected color."""
@@ -100,8 +98,10 @@ def toggle_pause(paused, pause_event, btn_pause):
         pause_event.set()  # Set the event to resume
     return paused  # Corrected indentation
 
+
 def show_about():
     messagebox.showinfo("About", f"{config.APP_NAME} v{config.APP_VERSION}\n{config.COPYRIGHT_NOTICE}\nDeveloped by: NhemNhem")
+
 
 def update_preview(selected_color, format_dropdown, preview_label):
     """Updates the preview label with the selected color and format."""
@@ -117,6 +117,59 @@ def update_preview(selected_color, format_dropdown, preview_label):
 
     preview_label.config(text=preview_text, foreground=color)
 
-# Dictionaries to store references to file-specific widgets (for progress updates, etc.) # Good documentation
+
+# Dictionaries to store references to file-specific widgets
 file_status = {}
 file_widgets = {}
+
+
+# Wrapper functions
+def start_translation_wrapper():
+    """Wrapper function to call start_translation from file_handling."""
+    file_handling.start_translation(
+        file_paths,
+        gui.file_frame,
+        gui.file_status,
+        gui.file_widgets,
+        gui.selected_format,
+        gui.selected_color,
+        gui.root,
+        stop_translation,
+        paused,
+        pause_event,
+        translated_files
+    )
+
+
+def on_format_change(*args):
+    """Callback when the format dropdown changes."""
+    gui.update_preview(gui.selected_color, gui.format_dropdown, gui.preview_label)
+
+
+def cancel_translation_wrapper():
+    global stop_translation
+    stop_translation = True
+    file_handling.cancel_translation(stop_translation)
+
+
+def toggle_pause_wrapper():
+    global paused
+    paused = gui.toggle_pause(paused, file_handling.pause_event, gui.btn_pause)
+
+
+def clear_files():
+    """Clears the selected files and resets the UI."""
+    global file_paths, translated_files  # Good to list globals being modified
+    file_paths = []
+    translated_files = []
+
+    for widget in gui.file_frame.inner_frame.winfo_children():  # Corrected frame to clear widgets from inner_frame
+        widget.destroy()
+
+    gui.file_status.clear()
+    gui.file_widgets.clear()
+
+    gui.file_label.config(text="Chưa chọn file", foreground=config.LABEL_COLOR)
+    gui.btn_translate.config(state=tk.DISABLED)
+    gui.btn_apply_color.config(state=tk.DISABLED)
+    gui.btn_open_folder.config(state=tk.DISABLED)
