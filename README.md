@@ -70,6 +70,11 @@ root = tk.Tk()  # Khởi tạo Tkinter trước
 ...
 gif_image = Image.open(gif_path)
 ```
+
+### 4️⃣ **Lỗi** `Ký tự: nhưng file .srt vẫn đúng`
+
+🔹 Cách khắc phục: Sử dụng trình phát Videos [VLC](https://www.videolan.org/vlc/) hoặc tương tự để đọc sub.
+
 ---
 ## 💻 Hướng dẫn sử dụng
 
