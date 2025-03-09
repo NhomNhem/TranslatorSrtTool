@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, colorchooser, messagebox
 from PIL import Image, ImageTk, ImageSequence
-#import file_handling  # Import file_handling to use resource_path REMOVED
+#import file_handling  # Import file_handling to use resource_path REMOVED # Good - no direct file_handling import
 import config        # Import config for constants
 import sys          # For sys.platform
 
@@ -61,8 +61,8 @@ class ScrolledFrame(tk.Frame):
     def _unbound_to_mousewheel(self, event):
         self.canvas.unbind_all("<MouseWheel>")
 
-# --- Global Variables (Avoid if possible) ---
-# These are set in main.py after the Tkinter root window is created.
+# --- Global Variables (Avoid if possible) --- # Good comment about avoiding globals
+# These are set in main.py after the Tkinter root window is created. # Explanation is good
 root = None
 file_frame = None
 file_label = None
@@ -75,11 +75,10 @@ color_label = None
 preview_label = None
 format_dropdown = None
 color_button = None
-selected_format = None  # Use StringVar in main.py
-selected_color = None   # Use StringVar in main.py
+selected_format = None  # Use StringVar in main.py # Documentation helpful
+selected_color = None   # Use StringVar in main.py # Documentation helpful
 
-# --- GIF Animation --- Removed
-
+# --- GIF Animation --- Removed # Comment helpful
 
 def choose_color(selected_color, preview_label, format_dropdown):
     """Opens a color chooser and updates the selected color."""
@@ -118,6 +117,6 @@ def update_preview(selected_color, format_dropdown, preview_label):
 
     preview_label.config(text=preview_text, foreground=color)
 
-# Dictionaries to store references to file-specific widgets (for progress updates, etc.)
+# Dictionaries to store references to file-specific widgets (for progress updates, etc.) # Good documentation
 file_status = {}
 file_widgets = {}

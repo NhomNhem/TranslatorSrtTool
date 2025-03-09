@@ -7,16 +7,7 @@ import sys # Thêm
 
 
 def translate_line(translator, line, format_):
-    """Dịch một dòng, xử lý các trường hợp khác nhau.
-
-    Args:
-        translator: Đối tượng GoogleTranslator.
-        line: Dòng cần dịch.
-        format_: Định dạng phụ đề (".srt" hoặc ".ass").
-
-    Returns:
-        Dòng đã dịch, hoặc dòng gốc nếu không cần dịch.
-    """
+    """Dịch một dòng, xử lý các trường hợp khác nhau."""
     try:
         if format_ == ".srt":
             if "-->" not in line and not line.strip().isdigit() and line.strip() != "":
@@ -41,39 +32,28 @@ def translate_line(translator, line, format_):
         return line  # Hoặc có thể return ""
 
 
-def translate_subtitle(file_path, output_path, format_, color, progress_var, file_item_label, open_button,
-                       stop_translation, paused, pause_event, root):
-    """Hàm dịch phụ đề (được gọi trong thread).
+def _apply_color_to_translated_srt_line(line, color):
+    """Áp dụng màu cho dòng SRT đã dịch."""
+    if "-->" not in line and not line.strip().isdigit() and line.strip() != "":
+        return f"<font color='{color}'>{line.strip()}</font>\n"
+    return line
 
-    Args:
-        file_path: Đường dẫn đến file phụ đề gốc.
-        output_path: Đường dẫn đến file phụ đề đầu ra.
-        format_: Định dạng phụ đề (".srt" hoặc ".ass").
-        color: Mã màu hex (ví dụ: "#FFFFFF").
-        progress_var: Biến IntVar để cập nhật tiến trình.
-        file_item_label: Label để hiển thị trạng thái dịch.
-        open_button: Nút để mở file sau khi dịch xong.
-        stop_translation: Biến (global) để dừng quá trình dịch.
-        paused: Biến (global) để tạm dừng quá trình dịch.
-        pause_event: Event để xử lý tạm dừng/tiếp tục.
-        root: Cửa sổ Tkinter gốc.
-    """
+def _apply_color_to_translated_ass_line(line, color):
+    """Áp dụng màu cho dòng ASS đã dịch."""
+    if "Dialogue:" in line:
+        parts = line.split(",", 9)
+        if len(parts) > 9:
+            parts[9] = parts[9].replace(r"{\c&H[0-9a-fA-F]+&}", "")
+            parts[9] = f"{{\\c&H{color[1:]}&}}{parts[9].strip()}"  # Bỏ #
+            return ",".join(parts)
+    return line
+
+
+def translate_subtitle(lines, output_path, format_, color, progress_var, file_item_label, open_button,
+                       stop_translation, paused, pause_event, root):
+    """Hàm dịch phụ đề (được gọi trong thread) - **ĐÃ SỬA ĐỂ KHÔNG ĐỌC/GHI FILE TRỰC TIẾP**."""
 
     translator = GoogleTranslator(source="en", target="vi")
-
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            lines = file.readlines()
-    except FileNotFoundError:
-        file_item_label.config(text="❌ Không tìm thấy", foreground="red")
-        return
-    except Exception as e:
-        file_item_label.config(text="❌ Lỗi mở file", foreground="red")
-        return
-
-    if not lines:
-        file_item_label.config(text="❌ File rỗng", foreground="red")
-        return
 
     translated_lines = []
     total_lines = len(lines)
@@ -81,10 +61,6 @@ def translate_subtitle(file_path, output_path, format_, color, progress_var, fil
     for i, line in enumerate(lines):
         if stop_translation:
             file_item_label.config(text="❌ Dịch bị hủy!", foreground="red")
-            try:
-                os.remove(output_path)
-            except OSError:
-                pass
             return
 
         if paused:
@@ -96,40 +72,23 @@ def translate_subtitle(file_path, output_path, format_, color, progress_var, fil
             translated_lines.append(translate_line(translator, line, format_))
         except Exception as e:
             file_item_label.config(text="❌ Lỗi dịch", foreground="red")
-            # Có thể log lỗi e vào một file, hoặc hiển thị chi tiết hơn nếu cần
+            messagebox.showerror("Lỗi dịch", str(e)) # Hiển thị lỗi cụ thể hơn
             return
 
         progress_var.set(int((i + 1) / total_lines * 100))
         root.update_idletasks()
 
-    # Áp dụng màu (và định dạng)
+    # Áp dụng màu (và định dạng) - Sử dụng hàm hỗ trợ mới
     final_lines = []
     for line in translated_lines:
         if format_ == ".srt":
-            if "-->" not in line and not line.strip().isdigit() and line.strip() != "":
-                final_lines.append(f"<font color='{color}'>{line.strip()}</font>\n")
-            else:
-                final_lines.append(line)
+            final_lines.append(_apply_color_to_translated_srt_line(line, color))
         elif format_ == ".ass":
-            if "Dialogue:" in line:
-                parts = line.split(",", 9)
-                if len(parts) > 9:
-                    parts[9] = parts[9].replace(r"{\c&H[0-9a-fA-F]+&}", "")
-                    parts[9] = f"{{\\c&H{color[1:]}&}}{parts[9].strip()}"  # Bỏ #
-                    final_lines.append(",".join(parts))
-            else:  # Trường hợp default (không nên xảy ra)
-                final_lines.append(line)
+            final_lines.append(_apply_color_to_translated_ass_line(line, color))
         else:
             final_lines.append(line)
 
-    try:
-        with open(output_path, "w", encoding="utf-8") as file:
-            file.writelines(final_lines)
-        file_item_label.config(text="✅ Hoàn tất", foreground="green")
-        open_button.config(state=tk.NORMAL, command=lambda p=output_path: open_file(p))
-    except Exception as e:
-        file_item_label.config(text="❌ Lỗi ghi file", foreground="red")
-        return
+    return final_lines # **TRẢ VỀ DANH SÁCH DÒNG ĐÃ XỬ LÝ, KHÔNG GHI FILE**
 
 
 def open_file(file_path):

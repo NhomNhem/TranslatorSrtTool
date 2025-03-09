@@ -1,12 +1,12 @@
-import tkinter as tk
+import tkinter as tk # Redundant import, already imported at the top. Remove this.
 from tkinter import ttk
-import gui
-import file_handling
-import config
+import gui # Redundant import, this is gui.py
+import file_handling # Redundant import in this block, already used in wrapper functions below
+import config # Redundant import in this block, already imported at the top
 import sys
 import threading
 
-# Wrapper functions (no changes here)
+# Wrapper functions (no changes here) # Comment helpful
 def start_translation_wrapper():
     """Wrapper function to call start_translation from file_handling."""
     file_handling.start_translation(
@@ -39,11 +39,11 @@ def toggle_pause_wrapper():
 
 def clear_files():
     """Clears the selected files and resets the UI."""
-    global file_paths, translated_files
+    global file_paths, translated_files # Good to list globals being modified
     file_paths = []
     translated_files = []
 
-    for widget in gui.file_frame.winfo_children():
+    for widget in gui.file_frame.inner_frame.winfo_children(): # Corrected frame to clear widgets from inner_frame
         widget.destroy()
 
     gui.file_status.clear()
@@ -55,7 +55,7 @@ def clear_files():
     gui.btn_open_folder.config(state=tk.DISABLED)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # Main application setup is within gui.py, a bit unconventional, could be moved to a separate main.py
     root = tk.Tk()
     root.title("SRT Translator")
     root.geometry("800x800")  # Set initial size
@@ -65,12 +65,12 @@ if __name__ == "__main__":
     selected_format = tk.StringVar(value=config.DEFAULT_FORMAT)
     selected_color = tk.StringVar(value=config.DEFAULT_COLOR)
 
-    file_paths = []
-    stop_translation = False
-    paused = False
-    pause_event = threading.Event()
-    pause_event.set()
-    translated_files = []
+    file_paths = [] # Globals initialized here, consistent
+    stop_translation = False # Globals initialized here, consistent
+    paused = False # Globals initialized here, consistent
+    pause_event = threading.Event() # Globals initialized here, consistent
+    pause_event.set() # Globals initialized here, consistent
+    translated_files = [] # Globals initialized here, consistent
 
     # --- Main Frame ---
     main_frame = tk.Frame(root, bg=config.BG_COLOR)
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     top_frame.pack(fill=tk.X)
 
     style = ttk.Style()
-    style.configure('TButton', background=config.BUTTON_COLOR, foreground=config.BUTTON_TEXT_COLOR, font=config.FONT, borderwidth=0)
-    style.map('TButton', background=[('active', config.BUTTON_ACTIVE_COLOR)], foreground=[('active', config.BUTTON_TEXT_COLOR)])
+    style.configure('TButton', background=config.BUTTON_COLOR, foreground=config.BUTTON_TEXT_COLOR, font=config.FONT, borderwidth=0) # Button_TEXT_COLOR needs fix from config
+    style.map('TButton', background=[('active', config.BUTTON_ACTIVE_COLOR)], foreground=[('active', config.BUTTON_TEXT_COLOR)]) # Button_TEXT_COLOR needs fix from config
     style.configure("TProgressbar", foreground=config.PROGRESS_BAR_COLOR, background=config.PROGRESS_BAR_COLOR, troughcolor=config.BG_COLOR)
 
 
