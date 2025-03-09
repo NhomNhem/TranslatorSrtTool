@@ -12,6 +12,15 @@ if __name__ == "__main__":  # Main application setup - NOW IN MAIN.PY
     gui.root.resizable(False, False)
     gui.root.configure(bg=config.BG_COLOR)
 
+    try:
+        # Đường dẫn tương đối đến file icon.ico (đặt trong thư mục resources)
+        icon_path = file_handling.resource_path("icon.ico")
+        gui.root.iconbitmap(default=icon_path)  # Thiết lập icon cho cửa sổ (Windows)
+    except tk.TclError:
+        print("Không tìm thấy file icon hoặc lỗi hiển thị icon .ico.")
+    except Exception as e:
+        print(f"Lỗi không xác định khi thiết lập icon .ico: {e}")
+
     gui.selected_format = tk.StringVar(value=config.DEFAULT_FORMAT) # Sử dụng gui.selected_format
     gui.selected_color = tk.StringVar(value=config.DEFAULT_COLOR) # Sử dụng gui.selected_color
 
